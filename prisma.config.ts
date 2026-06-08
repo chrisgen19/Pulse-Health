@@ -6,20 +6,19 @@ import { defineConfig } from "prisma/config";
 // DATABASE_URL (e.g. Vercel) still wins in deployed environments.
 config({ path: ".env.local" });
 
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error(
-    "DATABASE_URL is not set. Add it to .env.local (see .env.example) or your platform env.",
-  );
-}
-
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
+  // Do NOT throw when DATABASE_URL is missing here. This config is loaded for
+  // every Prisma command, including `prisma generate` (run via postinstall),
+  // which needs no database connection — requiring the URL would break
+  // `pnpm install` on a fresh checkout/CI before .env.local exists. The
+  // datasource is "required for migration/introspection commands" only, and
+  // Prisma enforces that itself. The app's runtime guard lives in
+  // src/lib/prisma.ts, where a missing URL is a real error.
   datasource: {
-    url: databaseUrl,
+    url: process.env.DATABASE_URL,
   },
 });
