@@ -18,6 +18,19 @@ const schema = z.object({
       "BETTER_AUTH_SECRET must be changed from the .env.example placeholder",
     ),
   BETTER_AUTH_URL: z.string().url("BETTER_AUTH_URL must be a valid URL"),
+  // Optional comma-separated list of additional allowed origins (e.g. preview
+  // deployment URLs, an apex/www variant, or 127.0.0.1 in dev).
+  TRUSTED_ORIGINS: z
+    .string()
+    .optional()
+    .transform((v) =>
+      v
+        ? v
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
+    ),
 });
 
 const parsed = schema.safeParse(process.env);

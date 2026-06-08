@@ -12,6 +12,9 @@ import { env } from "@/lib/env";
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
+  // baseURL is trusted by default; add any extra origins (previews, apex/www,
+  // 127.0.0.1) so cross-origin sign-in requests aren't rejected.
+  trustedOrigins: [env.BETTER_AUTH_URL, ...env.TRUSTED_ORIGINS],
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: {
     enabled: true,
