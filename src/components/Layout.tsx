@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { LayoutDashboard, Plus, TrendingUp, Sun, Moon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LayoutDashboard, Plus, TrendingUp, Sun, Moon, LogOut } from "lucide-react";
+import { signOut } from "@/lib/auth-client";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,6 +19,13 @@ export const Layout: React.FC<LayoutProps> = ({
   onAddClick,
 }) => {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/login");
+    router.refresh();
+  };
 
   useEffect(() => {
     // Sync React theme state with document head class
@@ -81,8 +90,14 @@ export const Layout: React.FC<LayoutProps> = ({
               </>
             )}
           </button>
+
+          {/* Sign Out Nav Item */}
+          <button onClick={handleSignOut} className="sidebar-nav-item">
+            <LogOut className="sidebar-nav-icon" />
+            <span>Sign out</span>
+          </button>
         </nav>
-        
+
         <button onClick={onAddClick} className="sidebar-add-btn glow-sleep">
           <Plus className="sidebar-add-icon" />
           <span>Log New Data</span>
@@ -97,9 +112,14 @@ export const Layout: React.FC<LayoutProps> = ({
             <span className="logo-icon-sphere"></span>
             <span className="logo-text">PulseHealth</span>
           </div>
-          <button onClick={toggleTheme} className="theme-toggle-mobile-btn" aria-label="Toggle theme">
-            {theme === "dark" ? <Sun className="theme-icon" /> : <Moon className="theme-icon" />}
-          </button>
+          <div className="mobile-header-actions">
+            <button onClick={toggleTheme} className="theme-toggle-mobile-btn" aria-label="Toggle theme">
+              {theme === "dark" ? <Sun className="theme-icon" /> : <Moon className="theme-icon" />}
+            </button>
+            <button onClick={handleSignOut} className="theme-toggle-mobile-btn" aria-label="Sign out">
+              <LogOut className="theme-icon" />
+            </button>
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -207,6 +227,12 @@ export const Layout: React.FC<LayoutProps> = ({
           background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+        }
+
+        .mobile-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .theme-toggle-mobile-btn {

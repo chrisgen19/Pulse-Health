@@ -9,3 +9,10 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   msw: false
+
+# Pin kysely to 0.28.17. Better Auth's kysely-adapter imports
+# DEFAULT_MIGRATION_TABLE from kysely's entry, which 0.29.x dropped; better-auth's
+# range (^0.28.17 || ^0.29.0) otherwise resolves the broken 0.29.2 and breaks the
+# build. kysely is only a transitive dep (we use the Prisma adapter), so this is safe.
+overrides:
+  kysely: 0.28.17
