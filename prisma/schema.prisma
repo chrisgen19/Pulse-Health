@@ -27,15 +27,15 @@ enum ArrhythmiaSeverity {
 
 /// One record per calendar day — the container for that day's logs.
 model DailyLog {
-  id          String         @id @default(cuid())
-  date        DateTime       @db.Date
+  id          String          @id @default(cuid())
+  date        DateTime        @db.Date
   mood        Int? // 1-5
   sleep       SleepLog?
   food        FoodLog[]
   headaches   HeadacheLog[]
   arrhythmias ArrhythmiaLog[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@unique([date])
 }
@@ -54,7 +54,7 @@ model FoodLog {
   name       String
   mealType   MealType
   calories   Int?
-  time       String // e.g. "08:15 AM"
+  time       DateTime @db.Time(0) // time of day, e.g. 08:15
   dailyLog   DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
   dailyLogId String
 
@@ -67,7 +67,7 @@ model HeadacheLog {
   duration   Int // minutes
   triggers   String[]
   notes      String   @default("")
-  time       String
+  time       DateTime @db.Time(0)
   dailyLog   DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
   dailyLogId String
 
@@ -81,7 +81,7 @@ model ArrhythmiaLog {
   symptoms   String[]
   severity   ArrhythmiaSeverity
   notes      String             @default("")
-  time       String
+  time       DateTime           @db.Time(0)
   dailyLog   DailyLog           @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
   dailyLogId String
 
