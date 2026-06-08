@@ -1,0 +1,89 @@
+// Pulse Health — Prisma schema
+// Mirrors the client-side data model in src/context/HealthContext.tsx.
+// Single-user for now (the app has no auth yet); add a User relation when auth lands.
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MealType {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+
+enum ArrhythmiaSeverity {
+  mild
+  moderate
+  severe
+}
+
+/// One record per calendar day — the container for that day's logs.
+model DailyLog {
+  id          String          @id @default(cuid())
+  date        DateTime        @db.Date
+  mood        Int? // 1-5
+  sleep       SleepLog?
+  food        FoodLog[]
+  headaches   HeadacheLog[]
+  arrhythmias ArrhythmiaLog[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([date])
+}
+
+/// Optional one-per-day sleep summary.
+model SleepLog {
+  id         String   @id @default(cuid())
+  duration   Float // hours
+  quality    Int // 1-5
+  dailyLog   DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  dailyLogId String   @unique
+}
+
+model FoodLog {
+  id         String   @id @default(cuid())
+  name       String
+  mealType   MealType
+  calories   Int?
+  time       DateTime @db.Time(0) // time of day, e.g. 08:15
+  dailyLog   DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  dailyLogId String
+
+  @@index([dailyLogId])
+}
+
+model HeadacheLog {
+  id         String   @id @default(cuid())
+  severity   Int // 1-10
+  duration   Int // minutes
+  triggers   String[]
+  notes      String   @default("")
+  time       DateTime @db.Time(0)
+  dailyLog   DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  dailyLogId String
+
+  @@index([dailyLogId])
+}
+
+model ArrhythmiaLog {
+  id         String             @id @default(cuid())
+  bpm        Int
+  duration   Int // minutes
+  symptoms   String[]
+  severity   ArrhythmiaSeverity
+  notes      String             @default("")
+  time       DateTime           @db.Time(0)
+  dailyLog   DailyLog           @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  dailyLogId String
+
+  @@index([dailyLogId])
+}
