@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { LayoutDashboard, Plus, TrendingUp } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { LayoutDashboard, Plus, TrendingUp, Sun, Moon } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,6 +16,29 @@ export const Layout: React.FC<LayoutProps> = ({
   setActiveTab,
   onAddClick,
 }) => {
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  useEffect(() => {
+    // Sync React theme state with document head class
+    const isLight = document.documentElement.classList.contains("light");
+    const timer = setTimeout(() => {
+      setTheme(isLight ? "light" : "dark");
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    if (nextTheme === "light") {
+      document.documentElement.classList.add("light");
+      localStorage.setItem("theme", "light");
+    } else {
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("theme", "dark");
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Desktop Left Sidebar (Sticky) */}
@@ -40,6 +63,24 @@ export const Layout: React.FC<LayoutProps> = ({
             <TrendingUp className="sidebar-nav-icon" />
             <span>Insights & Trends</span>
           </button>
+
+          {/* Theme Toggle Nav Item */}
+          <button 
+            onClick={toggleTheme} 
+            className="sidebar-nav-item theme-toggle-sidebar"
+          >
+            {theme === "dark" ? (
+              <>
+                <Sun className="sidebar-nav-icon" />
+                <span>Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon className="sidebar-nav-icon" />
+                <span>Dark Mode</span>
+              </>
+            )}
+          </button>
         </nav>
         
         <button onClick={onAddClick} className="sidebar-add-btn glow-sleep">
@@ -50,6 +91,17 @@ export const Layout: React.FC<LayoutProps> = ({
 
       {/* Main Section */}
       <div className="app-main-layout">
+        {/* Mobile Header Bar */}
+        <div className="mobile-header-bar">
+          <div className="mobile-logo">
+            <span className="logo-icon-sphere"></span>
+            <span className="logo-text">PulseHealth</span>
+          </div>
+          <button onClick={toggleTheme} className="theme-toggle-mobile-btn" aria-label="Toggle theme">
+            {theme === "dark" ? <Sun className="theme-icon" /> : <Moon className="theme-icon" />}
+          </button>
+        </div>
+
         {/* Main Content Area */}
         <main className="app-content-area">{children}</main>
 
@@ -89,33 +141,105 @@ export const Layout: React.FC<LayoutProps> = ({
       <style jsx global>{`
         /* Global Page Base Setup */
         html, body {
-          background-color: #030408;
+          background-color: var(--bg-primary);
           margin: 0;
           padding: 0;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
           color: var(--text-primary);
           overflow-x: hidden;
+          transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .app-container {
           min-height: 100vh;
           display: flex;
-          flex-direction: row;
-          background: radial-gradient(circle at 10% 20%, rgba(8, 12, 28, 1) 0%, rgba(3, 4, 8, 1) 90%);
+          flex-direction: column;
+          background: var(--bg-app-gradient);
           width: 100%;
+          transition: background 0.3s ease;
         }
 
         .desktop-sidebar {
           display: none;
         }
 
+        /* Mobile Header Bar */
+        .mobile-header-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 20px;
+          background: var(--bg-sidebar);
+          backdrop-filter: var(--glass-blur);
+          -webkit-backdrop-filter: var(--glass-blur);
+          border-bottom: 1px solid var(--border-color);
+          width: 100%;
+          box-sizing: border-box;
+          z-index: 100;
+        }
+
+        .mobile-logo {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .mobile-logo .logo-icon-sphere {
+          width: 10px;
+          height: 10px;
+          background: var(--color-sleep-gradient);
+          border-radius: 50%;
+          box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+          display: inline-block;
+        }
+
+        .mobile-logo .logo-text {
+          font-size: 16px;
+          font-weight: 800;
+          color: var(--text-primary);
+          letter-spacing: -0.03em;
+          background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        html.light .mobile-logo .logo-text {
+          background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle-mobile-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: var(--bg-button-secondary);
+          border: 1px solid var(--border-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-primary);
+          cursor: pointer;
+          transition: var(--transition-bounce);
+        }
+
+        .theme-toggle-mobile-btn:active {
+          transform: scale(0.9);
+        }
+
+        .theme-icon {
+          width: 18px;
+          height: 18px;
+        }
+
         .app-main-layout {
           flex: 1;
           display: flex;
           flex-direction: column;
-          min-height: 100vh;
+          min-height: calc(100vh - 69px);
           position: relative;
           background-color: var(--bg-secondary);
+          transition: background-color 0.3s ease;
         }
 
         /* Scrollable content container */
@@ -133,15 +257,16 @@ export const Layout: React.FC<LayoutProps> = ({
           left: 0;
           right: 0;
           height: 84px;
-          background: rgba(10, 15, 29, 0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          background: var(--bg-bottom-nav);
+          backdrop-filter: var(--glass-blur);
+          -webkit-backdrop-filter: var(--glass-blur);
           border-top: 1px solid var(--border-color);
           display: flex;
           justify-content: space-around;
           align-items: center;
           padding: 0 16px 12px 16px;
           z-index: 100;
+          transition: background 0.3s ease;
         }
 
         .nav-item {
@@ -220,13 +345,17 @@ export const Layout: React.FC<LayoutProps> = ({
 
         /* RESPONSIVE DESKTOP LAYOUT */
         @media (min-width: 768px) {
+          .app-container {
+            flex-direction: row;
+          }
+
           .desktop-sidebar {
             display: flex;
             flex-direction: column;
             width: 260px;
-            background: rgba(10, 15, 29, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: var(--bg-sidebar);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
             border-right: 1px solid var(--border-color);
             padding: 30px 20px;
             height: 100vh;
@@ -234,6 +363,7 @@ export const Layout: React.FC<LayoutProps> = ({
             top: 0;
             z-index: 10;
             box-sizing: border-box;
+            transition: background-color 0.3s ease;
           }
 
           .sidebar-logo {
@@ -263,6 +393,12 @@ export const Layout: React.FC<LayoutProps> = ({
             -webkit-text-fill-color: transparent;
           }
 
+          html.light .logo-text {
+            background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          }
+
           .sidebar-nav {
             display: flex;
             flex-direction: column;
@@ -288,7 +424,7 @@ export const Layout: React.FC<LayoutProps> = ({
           }
 
           .sidebar-nav-item:hover {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--bg-sidebar-hover);
             color: var(--text-primary);
           }
 
@@ -338,6 +474,12 @@ export const Layout: React.FC<LayoutProps> = ({
           .sidebar-add-icon {
             width: 18px;
             height: 18px;
+          }
+
+          .app-main-layout {
+            height: 100vh;
+            overflow: hidden;
+            min-height: auto;
           }
 
           .app-content-area {

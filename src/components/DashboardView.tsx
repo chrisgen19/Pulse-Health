@@ -1343,7 +1343,7 @@ const swipeableStyles = `
   .food-item-card {
     position: relative;
     width: 100%;
-    background: #0e1322;
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 12px 16px;

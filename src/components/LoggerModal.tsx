@@ -477,14 +477,14 @@ export const LoggerModal: React.FC<LoggerModalProps> = ({
           border-bottom-right-radius: 0;
           border-top-left-radius: 32px;
           border-top-right-radius: 32px;
-          background: rgba(15, 23, 42, 0.95);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: var(--bg-modal);
+          border: 1px solid var(--border-color);
           max-height: 85vh;
           overflow-y: auto;
           display: flex;
           flex-direction: column;
           padding: 24px;
-          box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.6);
+          box-shadow: var(--shadow-modal);
           animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -528,7 +528,7 @@ export const LoggerModal: React.FC<LoggerModalProps> = ({
         }
 
         .close-btn {
-          background: rgba(255,255,255,0.03);
+          background: var(--bg-button-secondary);
           border: 1px solid var(--border-color);
           width: 34px;
           height: 34px;
@@ -543,7 +543,7 @@ export const LoggerModal: React.FC<LoggerModalProps> = ({
 
         .close-btn:hover {
           color: var(--text-primary);
-          background: rgba(255,255,255,0.08);
+          background: var(--bg-sidebar-hover);
         }
 
         .close-icon {
@@ -555,7 +555,7 @@ export const LoggerModal: React.FC<LoggerModalProps> = ({
         .modal-content :global(.modal-tabs) {
           display: flex !important;
           gap: 6px !important;
-          background: rgba(0, 0, 0, 0.25) !important;
+          background: var(--bg-toggle-bar) !important;
           border: 1px solid var(--border-color) !important;
           padding: 4px !important;
           border-radius: 14px !important;
@@ -647,7 +647,7 @@ export const LoggerModal: React.FC<LoggerModalProps> = ({
 
         .meal-type-btn {
           flex: 1;
-          background: rgba(255, 255, 255, 0.02);
+          background: var(--bg-checkbox);
           border: 1px solid var(--border-color);
           color: var(--text-secondary);
           padding: 10px 6px;
@@ -683,7 +683,7 @@ export const LoggerModal: React.FC<LoggerModalProps> = ({
         }
 
         .checkbox-btn {
-          background: rgba(255, 255, 255, 0.02);
+          background: var(--bg-checkbox);
           border: 1px solid var(--border-color);
           color: var(--text-secondary);
           padding: 8px;
@@ -708,7 +708,7 @@ export const LoggerModal: React.FC<LoggerModalProps> = ({
 
         /* Customize Shadcn Slider Track and Range Colors */
         :global(.intensity-slider-shadcn) :global([data-slot="slider-track"]) {
-          background: rgba(255, 255, 255, 0.04) !important;
+          background: var(--bg-input) !important;
           border: 1px solid var(--border-color) !important;
           height: 8px !important;
         }

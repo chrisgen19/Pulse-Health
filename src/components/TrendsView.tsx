@@ -190,9 +190,9 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
             <div className="chart-svg-container">
               <svg viewBox="0 0 320 160" className="chart-svg">
                 {/* Grid Lines */}
-                <line x1="30" y1="40" x2="310" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                <line x1="30" y1="85" x2="310" y2="85" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                <line x1="30" y1="130" x2="310" y2="130" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                <line x1="30" y1="40" x2="310" y2="40" className="chart-grid-line-subtle" />
+                <line x1="30" y1="85" x2="310" y2="85" className="chart-grid-line-subtle" />
+                <line x1="30" y1="130" x2="310" y2="130" className="chart-grid-line-main" />
 
                 {/* Line graph */}
                 {sleepPath && (
@@ -250,9 +250,9 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
                 </defs>
 
                 {/* Grid Lines */}
-                <line x1="30" y1="40" x2="310" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                <line x1="30" y1="85" x2="310" y2="85" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                <line x1="30" y1="130" x2="310" y2="130" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                <line x1="30" y1="40" x2="310" y2="40" className="chart-grid-line-subtle" />
+                <line x1="30" y1="85" x2="310" y2="85" className="chart-grid-line-subtle" />
+                <line x1="30" y1="130" x2="310" y2="130" className="chart-grid-line-main" />
 
                 {/* Area Fill */}
                 {moodAreaPath && (
@@ -708,7 +708,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
         /* Segmented control view toggle */
         .view-toggle-bar {
           display: flex;
-          background: rgba(0, 0, 0, 0.25);
+          background: var(--bg-toggle-bar);
           border: 1px solid var(--border-color);
           padding: 4px;
           border-radius: 14px;
@@ -736,9 +736,9 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
         }
 
         .toggle-btn.active {
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--bg-toggle-active);
           color: var(--text-primary);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .trend-chart-card {
@@ -847,7 +847,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
         }
 
         .ledger-symptom-entry {
-          background: rgba(255, 255, 255, 0.015);
+          background: var(--bg-entry);
           border: 1px solid var(--border-color);
           border-left: 3px solid transparent;
           border-radius: 12px;
@@ -949,7 +949,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
 
         /* See More Controls */
         .btn-see-more {
-          background: rgba(255, 255, 255, 0.02);
+          background: var(--bg-button-secondary);
           border: 1px solid var(--border-color);
           color: var(--text-primary);
           padding: 12px 24px;
@@ -1006,7 +1006,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
         }
 
         .month-nav-btn {
-          background: rgba(255, 255, 255, 0.03);
+          background: var(--bg-button-secondary);
           border: 1px solid var(--border-color);
           color: var(--text-primary);
           width: 32px;
@@ -1020,7 +1020,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
         }
 
         .month-nav-btn:hover {
-          background: rgba(255, 255, 255, 0.07);
+          background: var(--bg-sidebar-hover);
         }
 
         .calendar-grid {
@@ -1041,7 +1041,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
 
         .calendar-cell {
           aspect-ratio: 1;
-          background: rgba(255, 255, 255, 0.012);
+          background: var(--bg-cell);
           border: 1px solid var(--border-color);
           border-radius: 12px;
           position: relative;
@@ -1063,7 +1063,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
         }
 
         .calendar-cell:hover:not(.inactive) {
-          background: rgba(255, 255, 255, 0.04);
+          background: var(--bg-cell-hover);
           transform: translateY(-2px);
         }
 
@@ -1274,7 +1274,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
         }
 
         .detail-row {
-          background: rgba(255, 255, 255, 0.015);
+          background: var(--bg-input);
           border: 1px solid var(--border-color);
           border-radius: 12px;
           padding: 12px 14px;
@@ -1298,7 +1298,7 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
         .trigger-tag {
           font-size: 9px;
           font-weight: 500;
-          background: rgba(255, 255, 255, 0.03);
+          background: var(--bg-button-secondary);
           border: 1px solid var(--border-color);
           color: var(--text-secondary);
           padding: 2px 6px;
@@ -1310,6 +1310,17 @@ export const TrendsView: React.FC<TrendsViewProps> = ({ onNavigateToDashboard })
           color: var(--color-arrhythmia);
           background: rgba(244, 63, 94, 0.05);
           border-color: rgba(244, 63, 94, 0.15);
+        }
+
+        /* Chart SVG grid lines */
+        .chart-grid-line-subtle {
+          stroke: var(--chart-grid-subtle);
+          stroke-width: 1;
+        }
+
+        .chart-grid-line-main {
+          stroke: var(--chart-grid-main);
+          stroke-width: 1;
         }
       `}</style>
     </div>
