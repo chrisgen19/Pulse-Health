@@ -22,7 +22,10 @@ export const Layout: React.FC<LayoutProps> = ({
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await signOut();
+    const { error } = await signOut();
+    // If sign-out failed, the session cookie may still be set — don't navigate,
+    // or middleware would just bounce the user back to the app.
+    if (error) return;
     router.push("/login");
     router.refresh();
   };

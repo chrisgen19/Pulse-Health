@@ -36,15 +36,19 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    const { error: authError } = await signUp.email(parsed.data);
-    setLoading(false);
-
-    if (authError) {
-      setError(authError.message ?? "Unable to create account");
-      return;
+    try {
+      const { error: authError } = await signUp.email(parsed.data);
+      if (authError) {
+        setError(authError.message ?? "Unable to create account");
+        return;
+      }
+      router.push("/");
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    router.push("/");
-    router.refresh();
   }
 
   return (

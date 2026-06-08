@@ -34,15 +34,19 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    const { error: authError } = await signIn.email(parsed.data);
-    setLoading(false);
-
-    if (authError) {
-      setError(authError.message ?? "Unable to sign in");
-      return;
+    try {
+      const { error: authError } = await signIn.email(parsed.data);
+      if (authError) {
+        setError(authError.message ?? "Unable to sign in");
+        return;
+      }
+      router.push("/");
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    router.push("/");
-    router.refresh();
   }
 
   return (
