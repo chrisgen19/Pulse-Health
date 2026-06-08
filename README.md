@@ -2,16 +2,24 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+This project uses [pnpm](https://pnpm.io). Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+```
+
+Set up the database (Postgres). Copy the env template and provision the local DB:
+
+```bash
+cp .env.example .env.local
+sudo -u postgres psql -f scripts/db-setup.sql   # creates the role + database
+pnpm db:migrate                                  # applies the Prisma schema
+```
+
+Then run the development server:
+
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

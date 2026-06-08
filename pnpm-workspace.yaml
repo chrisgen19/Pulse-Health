@@ -1,0 +1,11 @@
+# pnpm build-script approvals. Allowed deps run their install/build scripts:
+#   - prisma / @prisma/engines: Prisma CLI engines for migrate & studio
+#   - sharp: native image optimization used by Next.js in production
+#   - unrs-resolver: native module resolver used by eslint-config-next
+# msw is not used at runtime, so its postinstall is denied.
+allowBuilds:
+  "@prisma/engines": true
+  prisma: true
+  sharp: true
+  unrs-resolver: true
+  msw: false
