@@ -80,9 +80,9 @@ function MainAppContent() {
   );
 }
 
-export function HealthApp() {
+export function HealthApp({ userId }: { userId: string }) {
   return (
-    <HealthProvider>
+    <HealthProvider userId={userId}>
       <MainAppContent />
     </HealthProvider>
   );

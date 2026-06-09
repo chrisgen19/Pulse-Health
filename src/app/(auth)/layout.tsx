@@ -12,9 +12,9 @@ const ECG_PATH = "M0,40 H92 l5,0 l5,-8 l5,8 l4,4 l5,-34 l6,46 l5,-22 l6,6 H260";
  * collapsing to a single centered column on mobile.
  *
  * Validates the session server-side: a genuinely signed-in user is sent to the
- * app. This is the authoritative counterpart to the optimistic middleware — a
- * stale/invalid cookie yields no session here, so the auth pages still render
- * (no redirect loop).
+ * app. Gating is server-side only (no middleware) and uses the same
+ * auth.api.getSession as the protected page, so the two checks can never
+ * disagree — a stale/invalid cookie simply renders the auth page (no loop).
  */
 export default async function AuthLayout({ children }: { children: ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() });
