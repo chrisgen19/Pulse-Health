@@ -74,7 +74,9 @@ export const HealthProvider: React.FC<{
 
   const { data: logs = {} } = useQuery({
     queryKey,
-    queryFn: fetchLogs,
+    // Wrap so TanStack's QueryFunctionContext isn't passed as an argument to the
+    // server action (it's non-serializable and would make the refetch fail).
+    queryFn: () => fetchLogs(),
     initialData: initialLogs,
   });
 
