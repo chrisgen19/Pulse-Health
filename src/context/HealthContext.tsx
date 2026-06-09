@@ -14,7 +14,11 @@ import {
   updateMoodAction,
   updateSleepAction,
 } from "@/actions/health";
-import { calculateSleepQuality, getOffsetDateString } from "@/lib/health-utils";
+import {
+  calculateSleepQuality,
+  formatLocalTimeOfDay,
+  getOffsetDateString,
+} from "@/lib/health-utils";
 import type {
   ArrhythmiaLog,
   DailyLog,
@@ -53,10 +57,6 @@ const createEmptyLog = (date: string): DailyLog => ({
   arrhythmias: [],
 });
 
-/** Current local time as a display string, e.g. "08:15 AM". */
-const nowTime = () =>
-  new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
 export const HealthProvider: React.FC<{
   children: React.ReactNode;
   userId: string;
@@ -86,9 +86,11 @@ export const HealthProvider: React.FC<{
     updater: (prev: LogsByDate) => LogsByDate,
     serverCall: () => Promise<unknown>,
   ) => {
-    const previous = queryClient.getQueryData<LogsByDate>(queryKey) ?? {};
-    queryClient.setQueryData<LogsByDate>(queryKey, updater(previous));
     void (async () => {
+      // Cancel in-flight refetches so they can't overwrite the optimistic update.
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<LogsByDate>(queryKey) ?? {};
+      queryClient.setQueryData<LogsByDate>(queryKey, updater(previous));
       try {
         await serverCall();
       } catch (error) {
@@ -124,14 +126,17 @@ export const HealthProvider: React.FC<{
   };
 
   const addFood = (date: string, name: string, mealType: FoodLog["mealType"], calories?: number) => {
-    const time = nowTime();
-    const food: FoodLog = { id: `temp-${crypto.randomUUID()}`, name, mealType, calories, time };
+    const time = formatLocalTimeOfDay();
+    // A client-generated id is persisted as-is, so the optimistic item and the
+    // DB row share one id — a follow-up delete works without waiting for refetch.
+    const id = crypto.randomUUID();
+    const food: FoodLog = { id, name, mealType, calories, time };
     runMutation(
       (prev) => {
         const day = prev[date] ?? createEmptyLog(date);
         return { ...prev, [date]: { ...day, food: [...day.food, food] } };
       },
-      () => addFoodAction({ date, name, mealType, calories, time }),
+      () => addFoodAction({ id, date, name, mealType, calories, time }),
     );
   };
 
@@ -153,14 +158,15 @@ export const HealthProvider: React.FC<{
     triggers: string[],
     notes: string,
   ) => {
-    const time = nowTime();
-    const headache: HeadacheLog = { id: `temp-${crypto.randomUUID()}`, severity, duration, triggers, notes, time };
+    const time = formatLocalTimeOfDay();
+    const id = crypto.randomUUID();
+    const headache: HeadacheLog = { id, severity, duration, triggers, notes, time };
     runMutation(
       (prev) => {
         const day = prev[date] ?? createEmptyLog(date);
         return { ...prev, [date]: { ...day, headaches: [...day.headaches, headache] } };
       },
-      () => addHeadacheAction({ date, severity, duration, triggers, notes, time }),
+      () => addHeadacheAction({ id, date, severity, duration, triggers, notes, time }),
     );
   };
 
@@ -183,14 +189,15 @@ export const HealthProvider: React.FC<{
     severity: ArrhythmiaLog["severity"],
     notes: string,
   ) => {
-    const time = nowTime();
-    const arrhythmia: ArrhythmiaLog = { id: `temp-${crypto.randomUUID()}`, bpm, duration, symptoms, severity, notes, time };
+    const time = formatLocalTimeOfDay();
+    const id = crypto.randomUUID();
+    const arrhythmia: ArrhythmiaLog = { id, bpm, duration, symptoms, severity, notes, time };
     runMutation(
       (prev) => {
         const day = prev[date] ?? createEmptyLog(date);
         return { ...prev, [date]: { ...day, arrhythmias: [...day.arrhythmias, arrhythmia] } };
       },
-      () => addArrhythmiaAction({ date, bpm, duration, symptoms, severity, notes, time }),
+      () => addArrhythmiaAction({ id, date, bpm, duration, symptoms, severity, notes, time }),
     );
   };
 

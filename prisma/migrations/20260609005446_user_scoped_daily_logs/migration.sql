@@ -1,3 +1,10 @@
+-- Remove any pre-auth DailyLog rows before adding the required userId.
+-- Such rows (from the prior global-per-date schema) have no owning user and
+-- cannot be backfilled; child rows cascade via their FKs. In practice the table
+-- has always been empty (data lived in localStorage), so this is a safeguard
+-- that keeps `prisma migrate deploy` from failing on the NOT NULL column.
+DELETE FROM "DailyLog";
+
 -- DropIndex
 DROP INDEX "DailyLog_date_key";
 

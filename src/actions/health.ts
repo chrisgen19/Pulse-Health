@@ -42,6 +42,7 @@ export async function updateMoodAction(input: { date: string; mood: number }) {
 }
 
 export async function addFoodAction(input: {
+  id: string;
   date: string;
   name: string;
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
@@ -51,6 +52,7 @@ export async function addFoodAction(input: {
   const userId = await requireUserId();
   const data = z
     .object({
+      id: z.string().min(1),
       date: dateSchema,
       name: z.string().min(1),
       mealType: mealTypeSchema,
@@ -68,6 +70,7 @@ export async function deleteFoodAction(input: { id: string }) {
 }
 
 export async function addHeadacheAction(input: {
+  id: string;
   date: string;
   severity: number;
   duration: number;
@@ -78,6 +81,7 @@ export async function addHeadacheAction(input: {
   const userId = await requireUserId();
   const data = z
     .object({
+      id: z.string().min(1),
       date: dateSchema,
       severity: z.number().int().min(1).max(10),
       duration: z.number().int().min(0),
@@ -96,6 +100,7 @@ export async function deleteHeadacheAction(input: { id: string }) {
 }
 
 export async function addArrhythmiaAction(input: {
+  id: string;
   date: string;
   bpm: number;
   duration: number;
@@ -107,6 +112,7 @@ export async function addArrhythmiaAction(input: {
   const userId = await requireUserId();
   const data = z
     .object({
+      id: z.string().min(1),
       date: dateSchema,
       bpm: z.number().int().min(0),
       duration: z.number().int().min(0),

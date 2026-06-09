@@ -104,11 +104,12 @@ export async function updateMood(userId: string, date: string, mood: number) {
 export async function addFood(
   userId: string,
   date: string,
-  input: { name: string; mealType: MealType; calories?: number; time: string },
+  input: { id: string; name: string; mealType: MealType; calories?: number; time: string },
 ) {
   const dailyLogId = await ensureDay(userId, date);
   await prisma.foodLog.create({
     data: {
+      id: input.id,
       dailyLogId,
       name: input.name,
       mealType: input.mealType,
@@ -128,6 +129,7 @@ export async function addHeadache(
   userId: string,
   date: string,
   input: {
+    id: string;
     severity: number;
     duration: number;
     triggers: string[];
@@ -138,6 +140,7 @@ export async function addHeadache(
   const dailyLogId = await ensureDay(userId, date);
   await prisma.headacheLog.create({
     data: {
+      id: input.id,
       dailyLogId,
       severity: input.severity,
       duration: input.duration,
@@ -156,6 +159,7 @@ export async function addArrhythmia(
   userId: string,
   date: string,
   input: {
+    id: string;
     bpm: number;
     duration: number;
     symptoms: string[];
@@ -167,6 +171,7 @@ export async function addArrhythmia(
   const dailyLogId = await ensureDay(userId, date);
   await prisma.arrhythmiaLog.create({
     data: {
+      id: input.id,
       dailyLogId,
       bpm: input.bpm,
       duration: input.duration,
@@ -184,12 +189,28 @@ export async function deleteArrhythmia(userId: string, id: string) {
 
 /* ------------------------------- Seed --------------------------------- */
 
-/** Write ~30 days of demo data for a brand-new user (one DB write per day). */
+/** True for a Prisma unique-constraint violation (P2002). */
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "P2002"
+  );
+}
+
+/**
+ * Write ~30 days of demo data for a brand-new user (one DB write per day),
+ * inside a transaction. Idempotent under concurrent first-login requests: if
+ * another request seeded first, the unique (userId, date) constraint rolls this
+ * transaction back and we treat it as a no-op.
+ */
 export async function seedDemoData(userId: string) {
   const days = buildSeedLogs();
-  await prisma.$transaction(
-    days.map((day) =>
-      prisma.dailyLog.create({
+  try {
+    await prisma.$transaction(
+      days.map((day) =>
+        prisma.dailyLog.create({
         data: {
           userId,
           date: parseDateOnly(day.date),
@@ -226,8 +247,13 @@ export async function seedDemoData(userId: string) {
           },
         },
       }),
-    ),
-  );
+      ),
+    );
+  } catch (error) {
+    // Another concurrent first-login request already seeded this user.
+    if (isUniqueViolation(error)) return;
+    throw error;
+  }
 }
 
 /** Deterministic ~30 days of sample logs (ids are placeholders; DB assigns real ones). */
@@ -263,7 +289,9 @@ function buildSeedLogs(): DailyLog[] {
 
   const days: DailyLog[] = [];
 
-  for (let i = 29; i >= 0; i--) {
+  // i = -1 includes "tomorrow" relative to the server, so a user whose local
+  // date is a day ahead of the (e.g. UTC) server still has data for their today.
+  for (let i = 29; i >= -1; i--) {
     const dateStr = getOffsetDateString(i);
     const dayOfWeek = new Date(dateStr).getDay();
 
