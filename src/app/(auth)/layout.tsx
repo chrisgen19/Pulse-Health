@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
 // A stylized ECG / heart-monitor trace used as the brand signature.
 const ECG_PATH = "M0,40 H92 l5,0 l5,-8 l5,8 l4,4 l5,-34 l6,46 l5,-22 l6,6 H260";
@@ -7,8 +10,19 @@ const ECG_PATH = "M0,40 H92 l5,0 l5,-8 l5,8 l4,4 l5,-34 l6,46 l5,-22 l6,6 H260";
  * Standalone shell for the auth routes (/login, /register): a split layout with
  * a brand story + animated pulse trace on the left and the form on the right,
  * collapsing to a single centered column on mobile.
+ *
+ * Validates the session server-side: a genuinely signed-in user is sent to the
+ * app. This is the authoritative counterpart to the optimistic middleware — a
+ * stale/invalid cookie yields no session here, so the auth pages still render
+ * (no redirect loop).
  */
-export default function AuthLayout({ children }: { children: ReactNode }) {
+export default async function AuthLayout({ children }: { children: ReactNode }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (session) {
+    redirect("/");
+  }
+
   return (
     <div className="auth-shell">
       <div className="auth-bg" aria-hidden />

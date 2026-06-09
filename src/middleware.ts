@@ -4,13 +4,14 @@ import { getSessionCookie } from "better-auth/cookies";
 const AUTH_ROUTES = ["/login", "/register"];
 
 /**
- * Optimistic auth gating. Reads only the session cookie (no DB call), so it is
- * Edge-safe and fast:
- *   - unauthenticated users hitting the app are sent to /login
- *   - authenticated users hitting /login or /register are sent to the app
+ * Optimistic auth gating (Edge-safe, no DB call): redirect users with no
+ * session cookie away from protected routes to /login.
  *
- * The cookie is not cryptographically verified here — that happens in the route
- * handlers/server code. This is just a redirect optimization.
+ * We deliberately do NOT redirect cookie-bearing users away from /login or
+ * /register here. The cookie is unverified, so a stale/revoked cookie would
+ * ping-pong with the server-validated redirect in src/app/page.tsx and lock the
+ * user out. The "already signed in -> go to the app" redirect is instead done
+ * with a real session check in src/app/(auth)/layout.tsx.
  */
 export function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
@@ -19,10 +20,6 @@ export function middleware(request: NextRequest) {
 
   if (!sessionCookie && !isAuthRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (sessionCookie && isAuthRoute) {
-    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
