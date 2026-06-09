@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addArrhythmiaAction,
@@ -64,6 +64,7 @@ export const HealthProvider: React.FC<{
 }> = ({ children, userId, initialLogs }) => {
   const queryClient = useQueryClient();
   const queryKey = ["logs", userId] as const;
+  const pendingMutations = useRef(0);
   const [selectedDate, setSelectedDate] = useState<string>("");
 
   // Initialize the selected date on the client to avoid SSR/timezone mismatch.
@@ -82,16 +83,17 @@ export const HealthProvider: React.FC<{
    * revalidate. The public action functions stay sync/void so consumer
    * components are unchanged.
    *
-   * Reconciliation (success or failure) is via `invalidateQueries`, not a
-   * whole-cache snapshot restore: refetching authoritative server state undoes a
-   * failed change while preserving any other in-flight mutation's optimistic
-   * edits (a snapshot restore would clobber them).
+   * Reconciliation is via `invalidateQueries`, not a whole-cache snapshot
+   * restore (which would clobber a concurrent mutation's optimistic edit). Only
+   * the LAST in-flight mutation revalidates, so an earlier mutation's refetch
+   * can't replace the cache with server data that lacks a later mutation's edit.
    */
   const runMutation = (
     updater: (prev: LogsByDate) => LogsByDate,
     serverCall: () => Promise<unknown>,
   ) => {
     void (async () => {
+      pendingMutations.current += 1;
       // Cancel in-flight refetches so they can't overwrite the optimistic update.
       await queryClient.cancelQueries({ queryKey });
       // Functional update over the *current* cache, so concurrent mutations stack.
@@ -101,7 +103,10 @@ export const HealthProvider: React.FC<{
       } catch (error) {
         console.error("Health update failed", error);
       } finally {
-        queryClient.invalidateQueries({ queryKey });
+        pendingMutations.current -= 1;
+        if (pendingMutations.current === 0) {
+          queryClient.invalidateQueries({ queryKey });
+        }
       }
     })();
   };

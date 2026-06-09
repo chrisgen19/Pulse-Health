@@ -114,7 +114,7 @@ export async function addArrhythmiaAction(input: {
     .object({
       id: z.string().min(1),
       date: dateSchema,
-      bpm: z.number().int().min(0),
+      bpm: z.number().int().min(20, "BPM is too low").max(300, "BPM is too high"),
       duration: z.number().int().min(0),
       symptoms: z.array(z.string()),
       severity: severitySchema,
