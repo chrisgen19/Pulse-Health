@@ -1,30 +1,61 @@
 import type { ReactNode } from "react";
 
+// A stylized ECG / heart-monitor trace used as the brand signature.
+const ECG_PATH = "M0,40 H92 l5,0 l5,-8 l5,8 l4,4 l5,-34 l6,46 l5,-22 l6,6 H260";
+
 /**
- * Standalone shell for the auth routes (/login, /register) — a centered card on
- * the app's dark gradient background, without the main app navigation.
+ * Standalone shell for the auth routes (/login, /register): a split layout with
+ * a brand story + animated pulse trace on the left and the form on the right,
+ * collapsing to a single centered column on mobile.
  */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center px-4 py-12"
-      style={{ background: "var(--bg-app-gradient)" }}
-    >
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex items-center justify-center gap-2.5">
-          <span
-            className="inline-block h-3 w-3 rounded-full"
-            style={{
-              background: "var(--color-sleep-gradient)",
-              boxShadow: "0 0 10px rgba(99, 102, 241, 0.6)",
-            }}
-          />
-          <span className="text-lg font-extrabold tracking-tight text-foreground">
-            PulseHealth
-          </span>
+    <div className="auth-shell">
+      <div className="auth-bg" aria-hidden />
+
+      <aside className="auth-brand">
+        <div className="auth-brand-inner">
+          <div className="auth-logo auth-reveal">
+            <span className="auth-logo-orb" />
+            <span className="auth-logo-text">PulseHealth</span>
+          </div>
+
+          <h2 className="auth-tagline auth-reveal" style={{ animationDelay: "0.08s" }}>
+            Every signal your body sends, <em>in one rhythm.</em>
+          </h2>
+
+          <div
+            className="auth-ecg auth-reveal"
+            style={{ animationDelay: "0.16s" }}
+            aria-hidden
+          >
+            <svg viewBox="0 0 260 80" preserveAspectRatio="none">
+              <path className="auth-ecg-base" d={ECG_PATH} />
+              <path className="auth-ecg-pulse" d={ECG_PATH} pathLength={1} />
+            </svg>
+          </div>
+
+          <ul className="auth-points auth-reveal" style={{ animationDelay: "0.24s" }}>
+            <li>
+              <span className="dot dot-sleep" /> Sleep quality, mood &amp; daily energy
+            </li>
+            <li>
+              <span className="dot dot-headache" /> Headache triggers &amp; patterns
+            </li>
+            <li>
+              <span className="dot dot-arrhythmia" /> Arrhythmia episodes &amp; BPM
+            </li>
+          </ul>
         </div>
-        {children}
-      </div>
+      </aside>
+
+      <main className="auth-panel">
+        <div className="auth-mobile-brand auth-reveal">
+          <span className="auth-logo-orb" />
+          <span className="auth-logo-text">PulseHealth</span>
+        </div>
+        <div className="auth-card">{children}</div>
+      </main>
     </div>
   );
 }
