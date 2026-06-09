@@ -81,7 +81,13 @@ export const calculateSleepQuality = (duration: number): number => {
   return 1;
 };
 
-export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const HealthProvider: React.FC<{ children: React.ReactNode; userId: string }> = ({
+  children,
+  userId,
+}) => {
+  // Scope storage to the signed-in user so accounts sharing a browser don't see
+  // each other's health logs.
+  const storageKey = `health_tracker_logs_${userId}`;
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [logs, setLogs] = useState<Record<string, DailyLog>>({});
   const [isLoaded, setIsLoaded] = useState(false);
@@ -95,7 +101,7 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const stored = localStorage.getItem("health_tracker_logs");
+    const stored = localStorage.getItem(storageKey);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
@@ -105,7 +111,7 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (Object.keys(parsed).length < 15) {
           const mock = generateMockData();
           setLogs(mock);
-          localStorage.setItem("health_tracker_logs", JSON.stringify(mock));
+          localStorage.setItem(storageKey, JSON.stringify(mock));
           setIsLoaded(true);
           return;
         }
@@ -145,27 +151,27 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         setLogs(parsed);
         if (migrated) {
-          localStorage.setItem("health_tracker_logs", JSON.stringify(parsed));
+          localStorage.setItem(storageKey, JSON.stringify(parsed));
         }
       } catch (e) {
         console.error("Failed to parse logs", e);
         const mock = generateMockData();
         setLogs(mock);
-        localStorage.setItem("health_tracker_logs", JSON.stringify(mock));
+        localStorage.setItem(storageKey, JSON.stringify(mock));
       }
     } else {
       const mock = generateMockData();
       setLogs(mock);
-      localStorage.setItem("health_tracker_logs", JSON.stringify(mock));
+      localStorage.setItem(storageKey, JSON.stringify(mock));
     }
     setIsLoaded(true);
-  }, []);
+  }, [storageKey]);
 
   // Save to localStorage on change
   useEffect(() => {
     if (!isLoaded || typeof window === "undefined") return;
-    localStorage.setItem("health_tracker_logs", JSON.stringify(logs));
-  }, [logs, isLoaded]);
+    localStorage.setItem(storageKey, JSON.stringify(logs));
+  }, [logs, isLoaded, storageKey]);
 
   // Actions
   const updateSleep = (date: string, duration: number) => {
