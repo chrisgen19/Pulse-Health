@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { HealthProvider, useHealth } from "@/context/HealthContext";
+import { QueryProvider } from "@/components/providers";
+import type { LogsByDate } from "@/lib/health-types";
 import { Layout } from "@/components/Layout";
 import { Header } from "@/components/Header";
 import { DashboardView } from "@/components/DashboardView";
@@ -80,10 +82,18 @@ function MainAppContent() {
   );
 }
 
-export function HealthApp({ userId }: { userId: string }) {
+export function HealthApp({
+  userId,
+  initialLogs,
+}: {
+  userId: string;
+  initialLogs: LogsByDate;
+}) {
   return (
-    <HealthProvider userId={userId}>
-      <MainAppContent />
-    </HealthProvider>
+    <QueryProvider>
+      <HealthProvider userId={userId} initialLogs={initialLogs}>
+        <MainAppContent />
+      </HealthProvider>
+    </QueryProvider>
   );
 }
