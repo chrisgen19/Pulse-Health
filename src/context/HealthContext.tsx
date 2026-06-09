@@ -79,8 +79,13 @@ export const HealthProvider: React.FC<{
 
   /**
    * Apply an optimistic update to the cache, run the server action, then
-   * revalidate. On failure, roll back to the snapshot. The public action
-   * functions stay sync/void so consumer components are unchanged.
+   * revalidate. The public action functions stay sync/void so consumer
+   * components are unchanged.
+   *
+   * Reconciliation (success or failure) is via `invalidateQueries`, not a
+   * whole-cache snapshot restore: refetching authoritative server state undoes a
+   * failed change while preserving any other in-flight mutation's optimistic
+   * edits (a snapshot restore would clobber them).
    */
   const runMutation = (
     updater: (prev: LogsByDate) => LogsByDate,
@@ -89,12 +94,11 @@ export const HealthProvider: React.FC<{
     void (async () => {
       // Cancel in-flight refetches so they can't overwrite the optimistic update.
       await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData<LogsByDate>(queryKey) ?? {};
-      queryClient.setQueryData<LogsByDate>(queryKey, updater(previous));
+      // Functional update over the *current* cache, so concurrent mutations stack.
+      queryClient.setQueryData<LogsByDate>(queryKey, (prev) => updater(prev ?? {}));
       try {
         await serverCall();
       } catch (error) {
-        queryClient.setQueryData<LogsByDate>(queryKey, previous);
         console.error("Health update failed", error);
       } finally {
         queryClient.invalidateQueries({ queryKey });
