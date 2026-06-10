@@ -82,6 +82,26 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Deploy on Coolify (Docker)
+
+The repo includes a production `Dockerfile`. In Coolify, create a resource from
+this repository with **Build Pack: Dockerfile**.
+
+**Required environment variables** (set in Coolify, _not_ committed):
+
+| Variable | Notes |
+| --- | --- |
+| `DATABASE_URL` | Postgres connection string |
+| `BETTER_AUTH_SECRET` | 32+ char random secret — `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+| `BETTER_AUTH_URL` | Public app URL, e.g. `https://pulse.example.com` |
+| `TRUSTED_ORIGINS` | Optional, comma-separated extra origins |
+
+Notes:
+
+- The app listens on **port 5088** (exposed by the image); point Coolify's domain at it.
+- On every start the container runs `prisma migrate deploy` (idempotent), then `next start`.
+- The build supplies placeholder env so `next build` passes; your real values are used at runtime.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
