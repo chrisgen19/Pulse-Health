@@ -1,0 +1,22 @@
+# Regenerated inside the image
+node_modules
+.next
+src/generated
+
+# Never copy secrets or env files into the image
+.env
+.env.*
+
+# VCS / CI / editors / misc
+.git
+.gitignore
+.github
+.vscode
+.idea
+.claude
+coverage
+*.log
+.DS_Store
+
+# Docs (not needed at build/runtime)
+*.md
